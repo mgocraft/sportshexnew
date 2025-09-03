@@ -1,0 +1,1 @@
+Put witch images here (witch1.png .. witch20.png).

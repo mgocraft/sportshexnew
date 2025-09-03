@@ -1,0 +1,1 @@
+export const computeHitRate=(s:number,h:number)=>s?Math.round(h/s*1000)/10:0;
