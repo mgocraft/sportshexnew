@@ -15,11 +15,14 @@ export default function Home(){
   const [teamId,setTeamId]=useState<number|null>(null);
   const [witchId,setWitchId]=useState<number|null>(null);
   const [type,setType]=useState<'bless'|'curse'>('curse');
+  const [errorMessage,setErrorMessage]=useState<string|null>(null);
   const router=useRouter();
 
   useEffect(()=>{(async()=>{
-    const {data:w}=await supabase.from('witches').select('*').eq('active',true).limit(50); setWitches(w||[]);
-    const {data:t}=await supabase.from('teams').select('*').limit(500); setTeams(t||[]);
+    const {data:w,error:we}=await supabase.from('witches').select('*').eq('active',true).limit(50);
+    if(we){console.error('Failed to fetch witches',we);setErrorMessage('Unable to load witches.');} else setWitches(w||[]);
+    const {data:t,error:te}=await supabase.from('teams').select('*').limit(500);
+    if(te){console.error('Failed to fetch teams',te);setErrorMessage('Unable to load teams.');} else setTeams(t||[]);
   })()},[]);
 
   const selected=witches.find(w=>w.id===witchId);
@@ -39,6 +42,7 @@ export default function Home(){
           <Link href="/admin" className="btn">Admin</Link>
         </nav>
       </header>
+      {errorMessage&&<div className="mb-4 text-red-500">{errorMessage}</div>}
       <section className="grid md:grid-cols-3 gap-6 items-start">
         <div className="card md:col-span-1">
           <h2 className="text-lg font-semibold mb-3">1) Choose a team</h2>
