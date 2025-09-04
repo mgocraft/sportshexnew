@@ -73,7 +73,7 @@ export default function Admin(){
         {rows.map(r => (
           <div key={r.id} className="card">
             <div className="text-sm opacity-70">{new Date(r.created_at).toLocaleString()}</div>
-            <div className="font-semibold mt-1">{r.witch_name || 'Unknown Witch'} -> {r.type.toUpperCase()} on {r.team_name || 'Unknown Team'}</div>
+            <div className="font-semibold mt-1">{r.witch_name || 'Unknown Witch'} &rarr; {r.type.toUpperCase()} on {r.team_name || 'Unknown Team'}</div>
             {r.note && <div className="text-sm mt-1 opacity-80">Note: {r.note}</div>}
             <div className="flex items-center gap-3 mt-3">
               <label className="text-sm">Result:</label>
