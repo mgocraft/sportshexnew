@@ -2,6 +2,9 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import Stripe from 'stripe';
 import { supabase } from '../../lib/supabaseClient';
+import type { PostgrestSingleResponse } from '@supabase/supabase-js';
+
+// optional: transactional email via Resend
 
 export const config={api:{bodyParser:false}};
 const stripe=new Stripe(process.env.STRIPE_SECRET_KEY||'',{apiVersion:'2023-10-16'});
@@ -25,6 +28,26 @@ export default async function handler(req:NextApiRequest,res:NextApiResponse){
       paid_at:new Date().toISOString(),
       status:'paid'
     });
+
+    let teamName:any=teamId; let witchName:any=witchId;
+    try{
+      const teamRes:PostgrestSingleResponse<any>=await supabase.from('teams').select('name').eq('id',Number(teamId)).single();
+      const witchRes:PostgrestSingleResponse<any>=await supabase.from('witches').select('name').eq('id',Number(witchId)).single();
+      teamName=teamRes.data?.name||teamName; witchName=witchRes.data?.name||witchName;
+    }catch(err){console.error('Lookup failed',err)}
+
+    try{
+      await fetch('https://api.resend.com/emails',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':`Bearer ${process.env.RESEND_API_KEY}`},
+        body:JSON.stringify({
+          from:process.env.RESEND_FROM||'no-reply@example.com',
+          to:process.env.RESEND_TO||'admin@example.com',
+          subject:`New ${type} for ${teamName}`,
+          text:`${witchName} cast a ${type} on ${teamName}.`
+        })
+      });
+    }catch(err){console.error('Email send failed',err)}
   }
   res.json({received:true});
 }
