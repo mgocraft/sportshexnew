@@ -15,7 +15,7 @@ export default async function handler(req:NextApiRequest,res:NextApiResponse){
   catch(err:any){return res.status(400).send(`Webhook Error: ${err.message}`)}
   if(event.type==='payment_intent.succeeded'){
     const pi=event.data.object as Stripe.PaymentIntent;
-    const {teamId,witchId,type,note}=(pi.metadata||{}) as any;
+    const {teamId,witchId,type,note,email,marketing_opt_in}=(pi.metadata||{}) as any;
     await supabase.from('orders').insert({
       team_id:Number(teamId),
       witch_id:Number(witchId),
@@ -25,6 +25,13 @@ export default async function handler(req:NextApiRequest,res:NextApiResponse){
       paid_at:new Date().toISOString(),
       status:'paid'
     });
+
+    if(marketing_opt_in==='true' && email){
+      const {data:existing}=await supabase.from('marketing_contacts').select('unsubscribed_at').eq('email',email).single();
+      if(!existing||!existing.unsubscribed_at){
+        await supabase.from('marketing_contacts').upsert({email,source:'checkout'},{onConflict:'email'});
+      }
+    }
   }
   res.json({received:true});
 }
