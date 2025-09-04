@@ -16,6 +16,7 @@ type OrderRow = {
   note: string|null;
   witch_name: string|null;
   team_name: string|null;
+  email: string|null;
 };
 
 export default function Admin(){
@@ -38,14 +39,14 @@ export default function Admin(){
     (async()=>{
       const { data, error } = await supabase
         .from('orders')
-        .select('id,created_at,team_id,witch_id,type,status,paid_at,result,factor,note, witches(name), teams(name)')
+        .select('id,created_at,team_id,witch_id,type,status,paid_at,result,factor,note,email, witches(name), teams(name)')
         .order('created_at', { ascending:false })
         .limit(100);
       if(!error && data){
         const mapped = (data as any[]).map(d => ({
           id: d.id, created_at: d.created_at, team_id: d.team_id, witch_id: d.witch_id, type: d.type,
           status: d.status, paid_at: d.paid_at, result: d.result, factor: d.factor, note: d.note,
-          witch_name: d.witches?.name ?? null, team_name: d.teams?.name ?? null
+          witch_name: d.witches?.name ?? null, team_name: d.teams?.name ?? null, email: d.email ?? null
         }));
         setRows(mapped);
       }
@@ -75,6 +76,7 @@ export default function Admin(){
             <div className="text-sm opacity-70">{new Date(r.created_at).toLocaleString()}</div>
             <div className="font-semibold mt-1">{r.witch_name || 'Unknown Witch'} &rarr; {r.type.toUpperCase()} on {r.team_name || 'Unknown Team'}</div>
             {r.note && <div className="text-sm mt-1 opacity-80">Note: {r.note}</div>}
+            {r.email && <div className="text-sm mt-1 opacity-80">Email: {r.email}</div>}
             <div className="flex items-center gap-3 mt-3">
               <label className="text-sm">Result:</label>
               <select value={r.result ?? ''} onChange={e=>{ const v=e.target.value||null; setRows(rows.map(x=>x.id===r.id?{...x,result:v as any}:x))}} className="bg-black/40 border border-gray-700 rounded p-1">

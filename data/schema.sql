@@ -22,6 +22,7 @@ create table if not exists orders(
   witch_id bigint references witches(id) on delete set null,
   team_id bigint references teams(id) on delete set null,
   type spell_type not null,
+  email text,
   status text not null default 'pending',
   paid_at timestamptz,
   result text,
@@ -29,6 +30,8 @@ create table if not exists orders(
   note text,
   created_at timestamptz not null default now()
 );
+
+alter table orders add column if not exists email text;
 
 create or replace function witch_leaderboard()
 returns table (witch_id bigint, name text, spells bigint, hits bigint, weighted_hits numeric, image_url text)
