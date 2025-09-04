@@ -30,6 +30,13 @@ create table if not exists orders(
   created_at timestamptz not null default now()
 );
 
+create table if not exists marketing_contacts(
+  email text primary key,
+  created_at timestamptz not null default now(),
+  source text not null,
+  unsubscribed_at timestamptz
+);
+
 create or replace function witch_leaderboard()
 returns table (witch_id bigint, name text, spells bigint, hits bigint, weighted_hits numeric, image_url text)
 language sql stable as $$
