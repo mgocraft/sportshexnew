@@ -5,6 +5,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
+const NOTE_MAX_LENGTH = 500;
 
 function CheckoutForm(){
   const stripe=useStripe(); const elements=useElements();
@@ -37,7 +38,8 @@ export default function PayPage(){
   useEffect(()=>{ if(!init.teamId||!init.witchId) return; (async()=>{
     try{
       setIntentError(null);
-      const res=await fetch('/api/create_payment_intent',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...init,note})});
+      const payloadNote=note.slice(0,NOTE_MAX_LENGTH);
+      const res=await fetch('/api/create_payment_intent',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...init,note:payloadNote})});
       if(!res.ok){
         const message=await res.text();
         throw new Error(message||'Failed to create payment intent');
@@ -53,7 +55,8 @@ export default function PayPage(){
   if(!clientSecret) return <main className="max-w-xl mx-auto p-6">
     <h1 className="text-2xl font-bold mb-3">Add your intent</h1>
     <label className="block text-sm mb-2">What exactly are you blessing/curing? (free text)</label>
-    <textarea value={note} onChange={e=>setNote(e.target.value)} className="w-full p-2 rounded bg-black/40 border border-gray-700" rows={4} placeholder="e.g., Bless the Bears' O-line vs Packers, Week 1"/>
+    <textarea value={note} onChange={e=>setNote(e.target.value)} maxLength={NOTE_MAX_LENGTH} className="w-full p-2 rounded bg-black/40 border border-gray-700" rows={4} placeholder="e.g., Bless the Bears' O-line vs Packers, Week 1"/>
+    <div className="text-xs opacity-60 mt-1 text-right">{note.length}/{NOTE_MAX_LENGTH} characters</div>
     {intentError?<p className="text-red-400 text-sm mt-3">{intentError}</p>:<div className="opacity-70 text-sm mt-3">Preparing payment...</div>}
   </main>;
 
@@ -61,7 +64,8 @@ export default function PayPage(){
     <main className="max-w-xl mx-auto p-6">
       <h1 className="text-2xl font-bold">Complete your {init.type}</h1>
       <label className="block text-sm mb-2 mt-4">What exactly are you blessing/curing? (free text)</label>
-      <textarea value={note} onChange={e=>setNote(e.target.value)} className="w-full p-2 rounded bg-black/40 border border-gray-700" rows={4} placeholder="e.g., Bless the Bears' O-line vs Packers, Week 1"/>
+      <textarea value={note} onChange={e=>setNote(e.target.value)} maxLength={NOTE_MAX_LENGTH} className="w-full p-2 rounded bg-black/40 border border-gray-700" rows={4} placeholder="e.g., Bless the Bears' O-line vs Packers, Week 1"/>
+      <div className="text-xs opacity-60 mt-1 text-right">{note.length}/{NOTE_MAX_LENGTH} characters</div>
       <CheckoutForm/>
     </main>
   </Elements>);
