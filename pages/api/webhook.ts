@@ -21,6 +21,7 @@ export default async function handler(req:NextApiRequest,res:NextApiResponse){
       witch_id:Number(witchId),
       type,
       note: note || null,
+      email: (pi.receipt_email || (pi.metadata as any)?.email) || null,
       factor: 1.0,
       paid_at:new Date().toISOString(),
       status:'paid'
